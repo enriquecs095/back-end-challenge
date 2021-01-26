@@ -17,7 +17,11 @@ namespace challenge_aa.Controllers {
         public AdminController(Models.postgresContext context) {
             db = context;
         }
-
+        /// <summary>  
+        /// Sing up.  
+        /// </summary>  
+        /// <returns>Returns the data</returns>  
+        // POST API/blablala
         [HttpPost("Registro")]
         public IActionResult RegistrarUsuario([FromBody] Usuario model) {//Registro de usuarios
             var data = db.Usuarios.Where(options => options.Correo == model.Correo.ToUpper()).ToList();
@@ -39,7 +43,8 @@ namespace challenge_aa.Controllers {
 
         [HttpPost("Login")]
         public IActionResult ValidarUsuario([FromBody] Usuario model) {//Registro de usuarios
-            var data = db.Usuarios.Where(options => options.Correo == model.Correo.ToUpper() && options.Contrasena == model.Contrasena).ToList();
+            var data = (from m in db.Usuarios.Where(options => options.Correo == model.Correo.ToUpper() && 
+                        options.Contrasena == model.Contrasena) select new { m.Correo,m.Idusuario,m.Nombre,m.Rol}).ToList();
             if (data.Count >= 1) {
                 return Ok(data);
             }
@@ -49,7 +54,6 @@ namespace challenge_aa.Controllers {
         [HttpPost("getOrder/{id}")]
         public IActionResult getOrden(int id) {
             var data = db.Clientes.FirstOrDefault(x => x.Idusuario == id);
-          
             var orders = db.Ordenes.Where(x => x.Idcliente == data.Idcliente)
                 .Select(x => new { x.Idorden ,x.Totalorden ,x.Fechaorden}).ToList();
             return Ok(orders);

@@ -11,6 +11,7 @@ namespace challenge_aa.Models
         {
             Administradors = new HashSet<Administrador>();
             Clientes = new HashSet<Cliente>();
+            ListaCarritos = new HashSet<ListaCarrito>();
         }
 
         public int Idusuario { get; set; }
@@ -21,5 +22,6 @@ namespace challenge_aa.Models
 
         public virtual ICollection<Administrador> Administradors { get; set; }
         public virtual ICollection<Cliente> Clientes { get; set; }
+        public virtual ICollection<ListaCarrito> ListaCarritos { get; set; }
     }
 }

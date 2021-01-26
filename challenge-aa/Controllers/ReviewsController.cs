@@ -45,6 +45,7 @@ namespace challenge_aa.Controllers
         [HttpGet("getAddReviews")]
         public IActionResult getAddReviews([FromBody] Review reviews)
         {
+            reviews.Fecha = DateTime.Now;
             db.Reviews.Add(reviews);
             db.SaveChanges();
             return Ok();

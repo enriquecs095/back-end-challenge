@@ -20,6 +20,7 @@ namespace challenge_aa.Models
         public virtual DbSet<Administrador> Administradors { get; set; }
         public virtual DbSet<Chat> Chats { get; set; }
         public virtual DbSet<Cliente> Clientes { get; set; }
+        public virtual DbSet<ListaCarrito> ListaCarritos { get; set; }
         public virtual DbSet<Mensaje> Mensajes { get; set; }
         public virtual DbSet<Menu> Menus { get; set; }
         public virtual DbSet<Ordene> Ordenes { get; set; }
@@ -103,13 +104,41 @@ namespace challenge_aa.Models
 
                 entity.Property(e => e.Telefono)
                     .HasMaxLength(20)
-                    .HasColumnName("telefono")
-                    .IsFixedLength(true);
+                    .HasColumnName("telefono");
 
                 entity.HasOne(d => d.IdusuarioNavigation)
                     .WithMany(p => p.Clientes)
                     .HasForeignKey(d => d.Idusuario)
                     .HasConstraintName("usuariosidusuarios");
+            });
+
+            modelBuilder.Entity<ListaCarrito>(entity =>
+            {
+                entity.HasKey(e => e.IdLista)
+                    .HasName("Lista_Carrito_pkey");
+
+                entity.ToTable("Lista_carrito");
+
+                entity.Property(e => e.IdLista)
+                    .HasColumnName("id_lista")
+                    .UseIdentityAlwaysColumn()
+                    .HasIdentityOptions(null, null, null, 999999L, null, null);
+
+                entity.Property(e => e.Cantidad).HasColumnName("cantidad");
+
+                entity.Property(e => e.Idproducto).HasColumnName("idproducto");
+
+                entity.Property(e => e.Idusuario).HasColumnName("idusuario");
+
+                entity.HasOne(d => d.IdproductoNavigation)
+                    .WithMany(p => p.ListaCarritos)
+                    .HasForeignKey(d => d.Idproducto)
+                    .HasConstraintName("idproducto");
+
+                entity.HasOne(d => d.IdusuarioNavigation)
+                    .WithMany(p => p.ListaCarritos)
+                    .HasForeignKey(d => d.Idusuario)
+                    .HasConstraintName("idusuario");
             });
 
             modelBuilder.Entity<Mensaje>(entity =>
@@ -127,9 +156,8 @@ namespace challenge_aa.Models
                 entity.Property(e => e.Idchat).HasColumnName("idchat");
 
                 entity.Property(e => e.Mensaje1)
-                    .HasMaxLength(30)
-                    .HasColumnName("mensaje")
-                    .IsFixedLength(true);
+                    .HasMaxLength(50)
+                    .HasColumnName("mensaje");
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
@@ -153,8 +181,7 @@ namespace challenge_aa.Models
 
                 entity.Property(e => e.Nombre)
                     .HasMaxLength(30)
-                    .HasColumnName("nombre")
-                    .IsFixedLength(true);
+                    .HasColumnName("nombre");
             });
 
             modelBuilder.Entity<Ordene>(entity =>
@@ -229,16 +256,14 @@ namespace challenge_aa.Models
                     .HasIdentityOptions(null, null, null, 99999L, null, null);
 
                 entity.Property(e => e.Descripcion)
-                    .HasMaxLength(30)
-                    .HasColumnName("descripcion")
-                    .IsFixedLength(true);
+                    .HasMaxLength(130)
+                    .HasColumnName("descripcion");
 
                 entity.Property(e => e.Idmenu).HasColumnName("idmenu");
 
                 entity.Property(e => e.Nombre)
-                    .HasMaxLength(30)
-                    .HasColumnName("nombre")
-                    .IsFixedLength(true);
+                    .HasMaxLength(27)
+                    .HasColumnName("nombre");
 
                 entity.Property(e => e.Precio)
                     .HasColumnType("money")
@@ -247,9 +272,8 @@ namespace challenge_aa.Models
                 entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.Url)
-                    .HasMaxLength(50)
-                    .HasColumnName("url")
-                    .IsFixedLength(true);
+                    .HasMaxLength(200)
+                    .HasColumnName("url");
 
                 entity.HasOne(d => d.IdmenuNavigation)
                     .WithMany(p => p.Productos)
@@ -272,9 +296,8 @@ namespace challenge_aa.Models
                 entity.Property(e => e.Idproducto).HasColumnName("idproducto");
 
                 entity.Property(e => e.Mensaje)
-                    .HasMaxLength(30)
-                    .HasColumnName("mensaje")
-                    .IsFixedLength(true);
+                    .HasMaxLength(300)
+                    .HasColumnName("mensaje");
 
                 entity.Property(e => e.Valoracion).HasColumnName("valoracion");
 
@@ -296,18 +319,15 @@ namespace challenge_aa.Models
 
                 entity.Property(e => e.Contrasena)
                     .HasMaxLength(30)
-                    .HasColumnName("contrasena")
-                    .IsFixedLength(true);
+                    .HasColumnName("contrasena");
 
                 entity.Property(e => e.Correo)
                     .HasMaxLength(30)
-                    .HasColumnName("correo")
-                    .IsFixedLength(true);
+                    .HasColumnName("correo");
 
                 entity.Property(e => e.Nombre)
                     .HasMaxLength(30)
-                    .HasColumnName("nombre")
-                    .IsFixedLength(true);
+                    .HasColumnName("nombre");
 
                 entity.Property(e => e.Rol).HasColumnName("rol");
             });

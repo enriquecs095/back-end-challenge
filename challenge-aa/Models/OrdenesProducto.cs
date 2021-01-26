@@ -8,7 +8,7 @@ namespace challenge_aa.Models
     public partial class OrdenesProducto
     {
         public int IdOrden { get; set; }
-        public int? IdProducto { get; set; }
+        public int IdProducto { get; set; }//I made a change in here
         public int IdOrdenesProducto { get; set; }
         public int? Cantidad { get; set; }
         public decimal? TotalProducto { get; set; }

@@ -46,7 +46,7 @@ namespace challenge {
 
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
-               endpoints.MapHub<MessageController>("/message");
+                endpoints.MapHub<MessageController>("/message");
             });
         }
     }

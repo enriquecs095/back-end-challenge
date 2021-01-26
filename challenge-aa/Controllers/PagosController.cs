@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using challenge_aa.Models;
+using Microsoft.EntityFrameworkCore;
+
+
 
 namespace challenge_aa.Controllers {
     [Route("api/[controller]")]
@@ -17,7 +20,7 @@ namespace challenge_aa.Controllers {
             db = context;
         }
 
-        [HttpPost("IngresarCompra")]
+        [HttpPost("IngresarOrden")]
         public int ingresarCompra([FromBody] Ordene model) {
             var data = db.Clientes.SingleOrDefault(x => x.Idusuario == model.Idcliente);
             model.Fechaorden = DateTime.Now;
@@ -27,9 +30,99 @@ namespace challenge_aa.Controllers {
             return model.Idorden;
         }
 
-        [HttpPost("IngresarOrdenes")]
-        public IActionResult ingresarOrdenes([FromBody] OrdenesProducto model) {
-            db.OrdenesProductos.Add(model);
+
+
+        [HttpPost("IngresarOrdenDetalle{idorden}")]
+        public IActionResult ingresarOrdenes([FromBody] OrdenesProducto[] Model, int idorden) {
+            foreach (OrdenesProducto model in Model) {
+                var producto = new Producto { Idproducto = model.IdProducto };
+                model.IdOrden = idorden;
+                model.TotalProducto = model.Cantidad * producto.Precio;
+                db.OrdenesProductos.Add(model);
+                db.SaveChanges();
+            }
+            return Ok();
+        }
+
+        [HttpPost("AgregarAlCarrito")]
+        public IActionResult agregarAlCarrito([FromBody] ListaCarrito model)
+        {
+            var data = (from lc in db.ListaCarritos.Where(option =>
+                        option.Idusuario == model.Idusuario &&
+                        option.Idproducto == model.Idproducto)
+                        select new { lc.IdLista }).ToList();
+            if (data.Count() > 0)
+            {
+                return Ok(false);
+            }
+            model.Cantidad = 1;
+            db.ListaCarritos.Add(model);
+            db.SaveChanges();
+            return Ok(true);
+        }
+
+
+        [HttpGet("GetListaCarrito{idusuario}")]
+        public IActionResult getListaCarrito(int idusuario)
+        {
+            var data = (from lc in db.ListaCarritos.Where(option => option.Idusuario == idusuario)
+                        select new { lc.Idproducto,
+                                     lc.IdLista,
+                                    lc.IdproductoNavigation.Nombre,
+                                    lc.IdproductoNavigation.Descripcion,
+                                    lc.IdproductoNavigation.Precio,
+                                    lc.IdproductoNavigation.Url,
+                                    lc.Cantidad}).ToList();
+            if (data.Count() == 0)
+            {
+                return Ok(false);
+            }
+            return Ok(data);
+        }
+
+        [HttpGet("GetTotalCarrito{idusuario}")]
+        public IActionResult getTotalCarrito(int idusuario)
+        {
+            decimal total = 0;
+            var data = (from lc in db.ListaCarritos.Where(option => option.Idusuario == idusuario)
+                        select new
+                        {
+                            lc.Idproducto,
+                            lc.IdLista,
+                            lc.IdproductoNavigation.Nombre,
+                            lc.IdproductoNavigation.Descripcion,
+                            lc.IdproductoNavigation.Precio,
+                            lc.IdproductoNavigation.Url,
+                            lc.Cantidad
+                        }).ToList();
+            if (data.Count() == 0)
+            {
+                return Ok(false);
+            }
+            
+            for (int i=0; i < data.Count(); i++) {
+                total += data[i].Cantidad * (data[i].Precio);
+            }
+            return Ok(total);
+        }
+
+
+
+        [HttpDelete("EliminarDelCarrito{idlista}")]
+        public IActionResult eliminarDelCarrito(int idlista)
+        {
+            var listaCarrito = new ListaCarrito { IdLista = idlista };
+            db.ListaCarritos.Remove(listaCarrito);
+            db.SaveChanges();
+            return Ok();
+        }
+
+
+        [HttpDelete("deleteProduct{id}")]
+        public IActionResult deleteProduct(int id)
+        {
+            var product = new Producto { Idproducto = id };
+            db.Productos.Remove(product);
             db.SaveChanges();
             return Ok();
         }
