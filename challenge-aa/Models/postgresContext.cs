@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -33,8 +34,12 @@ namespace challenge_aa.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseNpgsql("Host=challenge01.c8c1uywxrgq4.us-east-2.rds.amazonaws.com; Database=postgres;Username=challenge01;Password=challenge01");
+
+               IConfigurationRoot configuration = new ConfigurationBuilder()
+              .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+              .AddJsonFile("appsettings.json")
+              .Build();
+                optionsBuilder.UseNpgsql(configuration["ConnectionString:RDSConnection"]);
             }
         }
 
@@ -216,16 +221,13 @@ namespace challenge_aa.Models
                 entity.ToTable("Ordenes_productos");
 
                 entity.Property(e => e.IdOrdenesProducto)
-                    .ValueGeneratedNever()
-                    .HasColumnName("id_ordenes_producto");
+                    .HasColumnName("id_ordenes_producto")
+                    .UseIdentityAlwaysColumn()
+                    .HasIdentityOptions(null, null, null, 999999L, null, null);
 
                 entity.Property(e => e.Cantidad).HasColumnName("cantidad");
 
-                entity.Property(e => e.IdOrden)
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("id_orden")
-                    .UseIdentityAlwaysColumn()
-                    .HasIdentityOptions(null, null, null, 99999L, null, null);
+                entity.Property(e => e.IdOrden).HasColumnName("id_orden");
 
                 entity.Property(e => e.IdProducto).HasColumnName("id_producto");
 
@@ -236,7 +238,6 @@ namespace challenge_aa.Models
                 entity.HasOne(d => d.IdOrdenNavigation)
                     .WithMany(p => p.OrdenesProductos)
                     .HasForeignKey(d => d.IdOrden)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("ordenesidordenes");
 
                 entity.HasOne(d => d.IdProductoNavigation)

@@ -15,7 +15,7 @@ namespace challenge_aa.Models
         }
 
         public int Idproducto { get; set; }
-        public decimal Precio { get; set; }
+        public decimal? Precio { get; set; }
         public string Nombre { get; set; }
         public int? Idmenu { get; set; }
         public string Descripcion { get; set; }

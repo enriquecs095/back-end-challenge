@@ -32,17 +32,38 @@ namespace challenge_aa.Controllers {
 
 
 
-        [HttpPost("IngresarOrdenDetalle{idorden}")]
-        public IActionResult ingresarOrdenes([FromBody] OrdenesProducto[] Model, int idorden) {
-            foreach (OrdenesProducto model in Model) {
-                var producto = new Producto { Idproducto = model.IdProducto };
+        [HttpPost("IngresarOrdenDetalle/{idusuario}/{idorden}")]
+        public IActionResult ingresarOrdenes(int idusuario, int idorden) {
+            OrdenesProducto model;
+            var data = (from lc in db.ListaCarritos.Where(option => option.Idusuario == idusuario)
+                        select new
+                        {
+                            lc.Idproducto,
+                            lc.IdLista,
+                            lc.IdproductoNavigation.Nombre,
+                            lc.IdproductoNavigation.Descripcion,
+                            lc.IdproductoNavigation.Precio,
+                            lc.IdproductoNavigation.Url,
+                            lc.Cantidad
+                        }).ToList();
+            if (data.Count() == 0)
+            {
+                return Ok(false);
+            }
+
+            for (int i = 0; i < data.Count(); i++)
+            {
+                model = new OrdenesProducto();
                 model.IdOrden = idorden;
-                model.TotalProducto = model.Cantidad * producto.Precio;
+                model.IdProducto = data[i].Idproducto;
+                model.TotalProducto = data[i].Cantidad * (data[i].Precio);
+                model.Cantidad = data[i].Cantidad;
                 db.OrdenesProductos.Add(model);
                 db.SaveChanges();
             }
-            return Ok();
+            return Ok(true);
         }
+
 
         [HttpPost("AgregarAlCarrito")]
         public IActionResult agregarAlCarrito([FromBody] ListaCarrito model)
@@ -75,7 +96,7 @@ namespace challenge_aa.Controllers {
                                     lc.Cantidad}).ToList();
             if (data.Count() == 0)
             {
-                return Ok(false);
+                return Ok(0);
             }
             return Ok(data);
         }
@@ -83,7 +104,7 @@ namespace challenge_aa.Controllers {
         [HttpGet("GetTotalCarrito{idusuario}")]
         public IActionResult getTotalCarrito(int idusuario)
         {
-            decimal total = 0;
+            decimal? total = 0;
             var data = (from lc in db.ListaCarritos.Where(option => option.Idusuario == idusuario)
                         select new
                         {
@@ -107,13 +128,42 @@ namespace challenge_aa.Controllers {
         }
 
 
-
         [HttpDelete("EliminarDelCarrito{idlista}")]
         public IActionResult eliminarDelCarrito(int idlista)
         {
             var listaCarrito = new ListaCarrito { IdLista = idlista };
             db.ListaCarritos.Remove(listaCarrito);
             db.SaveChanges();
+            return Ok();
+        }
+
+        [HttpPut("ActualizarTotal/{idusuario}/{idproducto}/{cantidad}")]
+        public IActionResult ActualizarTotal(int idusuario, int idproducto, int cantidad)
+        {
+            var data = db.ListaCarritos.SingleOrDefault(x => 
+                         x.Idusuario == idusuario &&
+                         x.Idproducto==idproducto);
+            data.Cantidad = cantidad;
+            db.ListaCarritos.Attach(data);
+            db.Entry(data).State = EntityState.Modified;
+            db.SaveChanges();
+            return Ok();
+        }
+
+        [HttpDelete("VaciarCarrito/{idusuario}")]
+        public IActionResult VaciarCarrito(int idusuario)
+        {
+            var data =  db.ListaCarritos.Where(option => option.Idusuario == idusuario).ToList();
+            if (data.Count() == 0)
+            {
+                return Ok(false);
+            }
+
+            for (int i = 0; i < data.Count(); i++)
+            {
+                db.ListaCarritos.Remove(data[i]);
+                db.SaveChanges();
+            }
             return Ok();
         }
 
@@ -128,7 +178,7 @@ namespace challenge_aa.Controllers {
         }
 
         [HttpPost("enviarEmail/{destino}/{id}/{total}")]
-        public IActionResult enviarEmail(string destino,int id,int total) {
+        public IActionResult enviarEmail(string destino,int id,decimal total) {
 
             string _sender = "enrik_cs@hotmail.com";
             string _password = "Capillas";
@@ -142,14 +192,11 @@ namespace challenge_aa.Controllers {
                 new System.Net.NetworkCredential(_sender, _password);
             client.EnableSsl = true;
             client.Credentials = credentials;
-
             MailMessage message = new MailMessage(_sender,destino);
             message.Subject = "Crunchy Roll Pizza";
             message.Body = "Felicidades has completado tu orden en Crunchy roll piza\nAgradecemos tu confiabilidad\nEste es tu ID de Orden:"+id + "\nCon un Total de :"+total+"\nEl repartidor llegara en aproximadamente 30 Minutos\nGracias por comprar en Crunchy Roll!";
             client.Send(message);
             client.Dispose();
-            //db.OrdenesProductos.Add(model);
-            //db.SaveChanges();
             return Ok();
         }
     }

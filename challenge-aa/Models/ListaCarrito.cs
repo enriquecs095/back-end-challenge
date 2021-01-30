@@ -9,7 +9,7 @@ namespace challenge_aa.Models
     {
         public int? Idusuario { get; set; }
         public int? Idproducto { get; set; }
-        public int Cantidad { get; set; }
+        public int? Cantidad { get; set; }
         public int IdLista { get; set; }
 
         public virtual Producto IdproductoNavigation { get; set; }

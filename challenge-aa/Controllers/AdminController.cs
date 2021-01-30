@@ -18,7 +18,7 @@ namespace challenge_aa.Controllers {
             db = context;
         }
         /// <summary>  
-        /// Sing up.  
+        /// Check and register the new user.  
         /// </summary>  
         /// <returns>Returns the data</returns>  
         // POST API/blablala

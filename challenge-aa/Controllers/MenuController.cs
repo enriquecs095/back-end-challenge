@@ -30,7 +30,7 @@ namespace challenge_aa.Controllers
         {
             var getdata = (from p in db.Productos.Where(options => options.Idmenu == idMenu && options.Status == 1)
                            select new { p.Idproducto, p.Precio, p.Nombre, p.Descripcion, p.Idmenu, p.Url }).ToList();
-            
+          
             return Json(getdata);
         }
     }

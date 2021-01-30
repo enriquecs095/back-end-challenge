@@ -15,6 +15,7 @@ using challenge_aa.Controllers;
 
 namespace challenge {
     public class Startup {
+
         public Startup(IConfiguration configuration) {
             Configuration = configuration;
         }
@@ -23,16 +24,21 @@ namespace challenge {
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+               .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+               .AddJsonFile("appsettings.json")
+               .Build();
+
             services.AddCors(options => {
                 options.AddPolicy("CorsPolicy", builder => builder.WithOrigins("http://localhost:4200").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             });
             services.AddSignalR();
             services.AddControllers();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-
-            var connection = @"Host=challenge01.c8c1uywxrgq4.us-east-2.rds.amazonaws.com; Database=postgres;Username=challenge01;Password=challenge01";
-            services.AddDbContext<postgresContext>(options => options.UseNpgsql(connection));
+            services.AddDbContext<postgresContext>(options => options.UseNpgsql(configuration["ConnectionString:RDSConnection"]));
         }
+
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
