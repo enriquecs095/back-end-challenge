@@ -135,7 +135,7 @@ namespace Challenge_AWS.Controllers {
                             x.Idproducto == idproducto &&
                             x.Idusuario==idusuario);
             db.ListaCarritos.Remove(data);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
             return Ok();
         }
 
